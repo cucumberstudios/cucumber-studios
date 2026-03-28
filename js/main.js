@@ -41,7 +41,7 @@ sections.forEach(s => sectionObserver.observe(s));
 
 // ── Scroll reveal ──
 const revealEls = document.querySelectorAll(
-  '.service-card, .process__step, .testimonial-card, .impact__item, .about__inner > *, .section-header'
+  '.service-card, .process__step, .testimonial-card, .impact__item, .about__inner > *, .section-header, .clients__carousel'
 );
 
 revealEls.forEach(el => el.classList.add('reveal'));
@@ -61,6 +61,87 @@ const revealObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.1 });
 
 revealEls.forEach(el => revealObserver.observe(el));
+
+// ── Clients carousel ──
+const clientsTrack = document.getElementById('clientsTrack');
+
+if (clientsTrack) {
+  const clients = [
+    { name: 'Trident Group', logo: 'assets/clients/trident-group.svg' },
+    { name: 'Sprengal Foods', logo: 'assets/clients/sprengal-foods.svg' },
+    { name: 'Zerund', logo: 'assets/clients/zerund.svg' },
+    { name: 'Kaizen The Label', logo: 'assets/clients/kaizen-the-label.svg' },
+    { name: 'First Brick', logo: 'assets/clients/first-brick.svg' },
+  ];
+
+  const getFallbackLetter = (name) => {
+    const trimmed = name.trim();
+    return trimmed ? trimmed.charAt(0).toUpperCase() : '?';
+  };
+
+  const createFallback = (name) => {
+    const fallback = document.createElement('div');
+    fallback.className = 'clients__logo-fallback';
+    fallback.setAttribute('aria-label', `${name} fallback mark`);
+    fallback.textContent = getFallbackLetter(name);
+    return fallback;
+  };
+
+  const createLogoBadge = (client) => {
+    const badge = document.createElement('div');
+    badge.className = 'clients__logo-badge';
+
+    if (!client.logo) {
+      badge.appendChild(createFallback(client.name));
+      return badge;
+    }
+
+    const image = document.createElement('img');
+    image.className = 'clients__logo-image';
+    image.src = client.logo;
+    image.alt = `${client.name} logo`;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+
+    image.addEventListener('error', () => {
+      if (!badge.querySelector('.clients__logo-fallback')) {
+        image.remove();
+        badge.appendChild(createFallback(client.name));
+      }
+    });
+
+    badge.appendChild(image);
+    return badge;
+  };
+
+  const createClientCard = (client, isClone = false) => {
+    const item = document.createElement('article');
+    item.className = 'clients__logo-item';
+    item.setAttribute('role', 'listitem');
+    if (isClone) {
+      item.setAttribute('aria-hidden', 'true');
+    }
+
+    const meta = document.createElement('div');
+    meta.className = 'clients__logo-meta';
+
+    const name = document.createElement('div');
+    name.className = 'clients__logo-name';
+    name.textContent = client.name;
+
+    const note = document.createElement('div');
+    note.className = 'clients__logo-note';
+    // note.textContent = 'Trusted client';
+
+    meta.append(name, note);
+    item.append(createLogoBadge(client), meta);
+    return item;
+  };
+
+  [...clients, ...clients].forEach((client, index) => {
+    clientsTrack.appendChild(createClientCard(client, index >= clients.length));
+  });
+}
 
 // ── Contact form ──
 const contactForm = document.getElementById('contactForm');
